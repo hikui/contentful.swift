@@ -21,14 +21,11 @@ public class Query: ResourceQuery, EntryQuery {
 /// See: <https://www.contentful.com/developers/docs/references/content-delivery-api/#/reference/search-parameters/search-on-references>
 /// and see the init<LinkType: EntryDecodable>(whereLinkAt fieldNameForLink: String, matches filterQuery: FilterQuery<LinkType>? = nil) methods
 /// on QueryOn for example usage.
-public final class LinkQuery<EntryType>: AbstractQuery where EntryType: EntryDecodable & FieldKeysQueryable {
-
-    /// The parameters dictionary that are converted to `URLComponents` (HTTP parameters/arguments) on the HTTP URL. Useful for debugging.
-    public var parameters: [String: String] = [String: String]()
+public final class LinkQuery<EntryType> where EntryType: EntryDecodable & FieldKeysQueryable {
 
     // Different function name to ensure inner call to where(valueAtKeyPath:operation:) doesn't recurse.
     private static func with(valueAtKeyPath keyPath: String, _ operation: Query.Operation) -> LinkQuery<EntryType> {
-        let filterQuery = LinkQuery<EntryType>.where(valueAtKeyPath: keyPath, operation)
+        let filterQuery = LinkQuery<EntryType>.init()
         filterQuery.propertyName = keyPath
         filterQuery.operation = operation
         return filterQuery
@@ -62,11 +59,17 @@ public final class LinkQuery<EntryType>: AbstractQuery where EntryType: EntryDec
     public static func `where`(field: EntryType.FieldKeys, _ operation: Query.Operation) -> LinkQuery<EntryType> {
         return LinkQuery<EntryType>.with(valueAtKeyPath: "fields.\(field.stringValue)", operation)
     }
+    
+    public static func `where`(sys key: Sys.CodingKeys, _ operation: Query.Operation) -> LinkQuery<EntryType> {
+        let keyPath = "sys.\(key.stringValue)"
+        let filterQuery = LinkQuery<EntryType>.init()
+        filterQuery.propertyName = keyPath
+        filterQuery.operation = operation
+        return filterQuery
+    }
 
     /// Designated initializer for FilterQuery.
-    public init() {
-        self.parameters = [String: String]()
-    }
+    public init() { }
 
     // MARK: FilterQuery<EntryType>.Private
 
